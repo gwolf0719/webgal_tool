@@ -1,0 +1,7 @@
+Game_name:WebGAL 擴展測試;
+Game_key:webgal_extension_test;
+Title_img:title.jpg;
+Title_bgm:title.mp3;
+Game_Logo:logo.png;
+Enable_Appreciation:true;
+

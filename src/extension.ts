@@ -1,0 +1,319 @@
+/**
+ * WebGAL 腳本擴展 - 主入口文件
+ * 
+ * 這是 WebGAL Cursor/VS Code 擴展的主入口，負責初始化所有功能模塊
+ * 包括：語法高亮、自動補全、定義跳轉、hover 提示、大綱視圖、診斷等
+ */
+
+import * as vscode from 'vscode';
+import { AssetScanner } from './parsers/assetScanner';
+import { VariableTracker } from './parsers/variableTracker';
+import { WebGALCompletionProvider } from './providers/completionProvider';
+import { WebGALHoverProvider } from './providers/hoverProvider';
+import { WebGALDefinitionProvider } from './providers/definitionProvider';
+import { WebGALDocumentSymbolProvider } from './providers/documentSymbolProvider';
+import { WebGALDiagnosticProvider } from './providers/diagnosticProvider';
+import { WebGALReferenceProvider } from './providers/referenceProvider';
+import { WebGALRenameProvider } from './providers/renameProvider';
+
+const WEBGAL_LANGUAGE = 'webgal';
+
+let assetScanner: AssetScanner;
+let variableTracker: VariableTracker;
+let diagnosticProvider: WebGALDiagnosticProvider;
+
+/**
+ * 擴展激活時調用
+ */
+export async function activate(context: vscode.ExtensionContext) {
+  console.log('WebGAL Script Extension 正在激活...');
+  
+  // 初始化掃描器和追蹤器
+  assetScanner = new AssetScanner();
+  variableTracker = new VariableTracker();
+  diagnosticProvider = new WebGALDiagnosticProvider(assetScanner, variableTracker);
+  
+  // 註冊語言提供器
+  registerProviders(context);
+  
+  // 註冊命令
+  registerCommands(context);
+  
+  // 初始化掃描
+  await initializeScanning();
+  
+  // 監聽文檔變化
+  setupDocumentListeners(context);
+  
+  // 顯示激活消息
+  vscode.window.showInformationMessage('WebGAL Script Extension 已啟動！');
+  
+  console.log('WebGAL Script Extension 激活完成');
+}
+
+/**
+ * 註冊所有語言提供器
+ */
+function registerProviders(context: vscode.ExtensionContext) {
+  const documentSelector: vscode.DocumentSelector = { language: WEBGAL_LANGUAGE };
+  
+  // 自動補全
+  const completionProvider = new WebGALCompletionProvider(assetScanner, variableTracker);
+  context.subscriptions.push(
+    vscode.languages.registerCompletionItemProvider(
+      documentSelector,
+      completionProvider,
+      ':', '-', '='
+    )
+  );
+  
+  // Hover 提示
+  const hoverProvider = new WebGALHoverProvider(assetScanner, variableTracker);
+  context.subscriptions.push(
+    vscode.languages.registerHoverProvider(documentSelector, hoverProvider)
+  );
+  
+  // 定義跳轉
+  const definitionProvider = new WebGALDefinitionProvider(assetScanner, variableTracker);
+  context.subscriptions.push(
+    vscode.languages.registerDefinitionProvider(documentSelector, definitionProvider)
+  );
+  
+  // 大綱視圖
+  const documentSymbolProvider = new WebGALDocumentSymbolProvider();
+  context.subscriptions.push(
+    vscode.languages.registerDocumentSymbolProvider(documentSelector, documentSymbolProvider)
+  );
+  
+  // 引用查找
+  const referenceProvider = new WebGALReferenceProvider(variableTracker);
+  context.subscriptions.push(
+    vscode.languages.registerReferenceProvider(documentSelector, referenceProvider)
+  );
+  
+  // 重命名
+  const renameProvider = new WebGALRenameProvider(variableTracker);
+  context.subscriptions.push(
+    vscode.languages.registerRenameProvider(documentSelector, renameProvider)
+  );
+  
+  console.log('所有語言提供器已註冊');
+}
+
+/**
+ * 註冊命令
+ */
+function registerCommands(context: vscode.ExtensionContext) {
+  // 掃描資源命令
+  context.subscriptions.push(
+    vscode.commands.registerCommand('webgal.scanResources', async () => {
+      vscode.window.showInformationMessage('正在掃描 WebGAL 資源...');
+      await assetScanner.scanAll();
+      await variableTracker.scanAll();
+      vscode.window.showInformationMessage('資源掃描完成！');
+    })
+  );
+  
+  // 插入對話命令
+  context.subscriptions.push(
+    vscode.commands.registerCommand('webgal.insertDialogue', () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        return;
+      }
+      
+      editor.insertSnippet(
+        new vscode.SnippetString('${1:角色名}:${2:對話內容}${3: -v=${4:語音.ogg}}')
+      );
+    })
+  );
+  
+  // 插入選擇分支命令
+  context.subscriptions.push(
+    vscode.commands.registerCommand('webgal.insertChoice', () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        return;
+      }
+      
+      const snippet = new vscode.SnippetString([
+        'choose:${1:選項1}:${2:label1}|${3:選項2}:${4:label2};',
+        '',
+        'label:${2:label1};',
+        '${5:; 選項1的內容}',
+        'jumpLabel:${6:end};',
+        '',
+        'label:${4:label2};',
+        '${7:; 選項2的內容}',
+        '',
+        'label:${6:end};'
+      ].join('\n'));
+      
+      editor.insertSnippet(snippet);
+    })
+  );
+  
+  // 插入標籤命令
+  context.subscriptions.push(
+    vscode.commands.registerCommand('webgal.insertLabel', async () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        return;
+      }
+      
+      const labelName = await vscode.window.showInputBox({
+        prompt: '請輸入標籤名稱',
+        placeHolder: 'labelName'
+      });
+      
+      if (labelName) {
+        editor.insertSnippet(new vscode.SnippetString(`label:${labelName};`));
+      }
+    })
+  );
+  
+  // 跳轉到標籤命令
+  context.subscriptions.push(
+    vscode.commands.registerCommand('webgal.gotoLabel', async () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        return;
+      }
+      
+      const document = editor.document;
+      const content = document.getText();
+      const { extractLabels } = require('./parsers/scriptParser');
+      const labels = extractLabels(content, document.fileName);
+      
+      if (labels.length === 0) {
+        vscode.window.showInformationMessage('當前文件中沒有找到標籤');
+        return;
+      }
+      
+      interface LabelQuickPickItem extends vscode.QuickPickItem {
+        lineNumber: number;
+      }
+      
+      const items: LabelQuickPickItem[] = labels.map((label: any) => ({
+        label: label.name,
+        description: `第 ${label.lineNumber + 1} 行`,
+        lineNumber: label.lineNumber
+      }));
+      
+      const selected = await vscode.window.showQuickPick(items, {
+        placeHolder: '選擇要跳轉的標籤'
+      });
+      
+      if (selected) {
+        const position = new vscode.Position(selected.lineNumber, 0);
+        editor.selection = new vscode.Selection(position, position);
+        editor.revealRange(
+          new vscode.Range(position, position),
+          vscode.TextEditorRevealType.InCenter
+        );
+      }
+    })
+  );
+  
+  console.log('所有命令已註冊');
+}
+
+/**
+ * 初始化掃描
+ */
+async function initializeScanning() {
+  const config = vscode.workspace.getConfiguration('webgal');
+  const autoScan = config.get<boolean>('autoScanResources', true);
+  
+  if (autoScan) {
+    console.log('開始初始掃描...');
+    await assetScanner.scanAll();
+    await variableTracker.scanAll();
+    
+    // 啟動文件監視
+    assetScanner.startWatching();
+    variableTracker.startWatching();
+    
+    console.log('初始掃描完成');
+  }
+}
+
+/**
+ * 設置文檔監聽器
+ */
+function setupDocumentListeners(context: vscode.ExtensionContext) {
+  // 文檔打開時
+  context.subscriptions.push(
+    vscode.workspace.onDidOpenTextDocument(async (document) => {
+      if (document.languageId === WEBGAL_LANGUAGE) {
+        await diagnosticProvider.diagnose(document);
+      }
+    })
+  );
+  
+  // 文檔保存時
+  context.subscriptions.push(
+    vscode.workspace.onDidSaveTextDocument(async (document) => {
+      if (document.languageId === WEBGAL_LANGUAGE) {
+        await variableTracker.scanFile(document.fileName);
+        await diagnosticProvider.diagnose(document);
+      }
+    })
+  );
+  
+  // 文檔變更時（延遲診斷）
+  let diagnosticTimeout: NodeJS.Timeout | undefined;
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeTextDocument((event) => {
+      if (event.document.languageId === WEBGAL_LANGUAGE) {
+        if (diagnosticTimeout) {
+          clearTimeout(diagnosticTimeout);
+        }
+        
+        diagnosticTimeout = setTimeout(() => {
+          diagnosticProvider.diagnose(event.document);
+        }, 500);
+      }
+    })
+  );
+  
+  // 文檔關閉時
+  context.subscriptions.push(
+    vscode.workspace.onDidCloseTextDocument((document) => {
+      if (document.languageId === WEBGAL_LANGUAGE) {
+        // 可以在這裡清理相關資源
+      }
+    })
+  );
+  
+  // 診斷當前打開的所有 WebGAL 文檔
+  vscode.workspace.textDocuments.forEach((document) => {
+    if (document.languageId === WEBGAL_LANGUAGE) {
+      diagnosticProvider.diagnose(document);
+    }
+  });
+  
+  console.log('文檔監聽器已設置');
+}
+
+/**
+ * 擴展停用時調用
+ */
+export function deactivate() {
+  console.log('WebGAL Script Extension 正在停用...');
+  
+  if (assetScanner) {
+    assetScanner.dispose();
+  }
+  
+  if (variableTracker) {
+    variableTracker.dispose();
+  }
+  
+  if (diagnosticProvider) {
+    diagnosticProvider.dispose();
+  }
+  
+  console.log('WebGAL Script Extension 已停用');
+}
+

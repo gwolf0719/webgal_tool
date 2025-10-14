@@ -1,0 +1,152 @@
+{
+  "對話": {
+    "prefix": "dialogue",
+    "body": [
+      "${1:角色名}:${2:對話內容}${3: -v=${4:語音文件.ogg}}"
+    ],
+    "description": "插入角色對話"
+  },
+  "旁白": {
+    "prefix": "narration",
+    "body": [
+      ":${1:旁白內容}"
+    ],
+    "description": "插入旁白文字"
+  },
+  "更改背景": {
+    "prefix": "changeBg",
+    "body": [
+      "changeBg:${1:background.jpg}${2: -next};"
+    ],
+    "description": "更改背景圖片"
+  },
+  "更改立繪": {
+    "prefix": "changeFigure",
+    "body": [
+      "changeFigure:${1:character.png}${2| ,-left ,-right |}-next;"
+    ],
+    "description": "更改立繪"
+  },
+  "播放BGM": {
+    "prefix": "bgm",
+    "body": [
+      "bgm:${1:music.mp3};"
+    ],
+    "description": "播放背景音樂"
+  },
+  "標籤定義": {
+    "prefix": "label",
+    "body": [
+      "label:${1:labelName};"
+    ],
+    "description": "定義標籤"
+  },
+  "跳轉標籤": {
+    "prefix": "jump",
+    "body": [
+      "jumpLabel:${1:labelName};"
+    ],
+    "description": "跳轉到標籤"
+  },
+  "選擇分支": {
+    "prefix": "choose",
+    "body": [
+      "choose:${1:選項1文字}:${2:label1}|${3:選項2文字}:${4:label2};",
+      "",
+      "label:${2:label1};",
+      "${5:; 選項1的內容}",
+      "jumpLabel:${6:end};",
+      "",
+      "label:${4:label2};",
+      "${7:; 選項2的內容}",
+      "",
+      "label:${6:end};"
+    ],
+    "description": "插入完整的選擇分支結構"
+  },
+  "條件跳轉": {
+    "prefix": "if",
+    "body": [
+      "jumpLabel:${1:targetLabel} -when=${2:condition};"
+    ],
+    "description": "條件跳轉"
+  },
+  "設置變數": {
+    "prefix": "setVar",
+    "body": [
+      "setVar:${1:varName}=${2:value};"
+    ],
+    "description": "設置變數"
+  },
+  "調用場景": {
+    "prefix": "callScene",
+    "body": [
+      "callScene:${1:scene.txt}${2: -when=${3:condition}};"
+    ],
+    "description": "調用子場景"
+  },
+  "切換場景": {
+    "prefix": "changeScene",
+    "body": [
+      "changeScene:${1:scene.txt};"
+    ],
+    "description": "切換到另一個場景"
+  },
+  "播放視頻": {
+    "prefix": "playVideo",
+    "body": [
+      "playVideo:${1:video.mp4};"
+    ],
+    "description": "播放視頻"
+  },
+  "設置動畫": {
+    "prefix": "setAnimation",
+    "body": [
+      "setAnimation:${1:enter-from-left} -target=${2|fig-left,fig-center,fig-right|} -next;"
+    ],
+    "description": "設置動畫效果"
+  },
+  "小頭像": {
+    "prefix": "miniAvatar",
+    "body": [
+      "miniAvatar:${1:avatar.png};"
+    ],
+    "description": "顯示小頭像"
+  },
+  "解鎖CG": {
+    "prefix": "unlockCg",
+    "body": [
+      "unlockCg:${1:cg.jpg} -name=${2:CG名稱};"
+    ],
+    "description": "解鎖CG到鑑賞"
+  },
+  "解鎖BGM": {
+    "prefix": "unlockBgm",
+    "body": [
+      "unlockBgm:${1:music.mp3} -name=${2:音樂名稱};"
+    ],
+    "description": "解鎖BGM到鑑賞"
+  },
+  "註釋分隔符": {
+    "prefix": "separator",
+    "body": [
+      ";========================================",
+      "; ${1:區塊說明}",
+      ";========================================"
+    ],
+    "description": "插入註釋分隔符"
+  },
+  "場景頭部": {
+    "prefix": "scene-header",
+    "body": [
+      ";========================================",
+      "; 檔案名稱: ${1:scene.txt}",
+      "; 描述: ${2:場景描述}",
+      "; 說明: ${3:詳細說明}",
+      ";========================================",
+      ""
+    ],
+    "description": "插入場景頭部註釋"
+  }
+}
+

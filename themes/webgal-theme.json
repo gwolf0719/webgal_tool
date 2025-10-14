@@ -1,0 +1,72 @@
+{
+  "name": "WebGAL Dark",
+  "type": "dark",
+  "colors": {
+    "editor.background": "#1e1e1e",
+    "editor.foreground": "#d4d4d4",
+    "editorLineNumber.foreground": "#858585",
+    "editorLineNumber.activeForeground": "#c6c6c6",
+    "editor.selectionBackground": "#264f78",
+    "editor.inactiveSelectionBackground": "#3a3d41"
+  },
+  "tokenColors": [
+    {
+      "scope": "comment.line.webgal",
+      "settings": {
+        "foreground": "#6A9955",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "scope": "support.function.command.webgal",
+      "settings": {
+        "foreground": "#569CD6",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "entity.name.type.character.webgal",
+      "settings": {
+        "foreground": "#4EC9B0",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "string.unquoted.utterance.webgal",
+      "settings": {
+        "foreground": "#CE9178"
+      }
+    },
+    {
+      "scope": "variable.parameter.webgal",
+      "settings": {
+        "foreground": "#9CDCFE"
+      }
+    },
+    {
+      "scope": "string.quoted.webgal",
+      "settings": {
+        "foreground": "#CE9178"
+      }
+    },
+    {
+      "scope": "keyword.operator.webgal",
+      "settings": {
+        "foreground": "#D4D4D4"
+      }
+    },
+    {
+      "scope": "meta.command.webgal",
+      "settings": {
+        "foreground": "#569CD6"
+      }
+    },
+    {
+      "scope": "meta.character.webgal",
+      "settings": {
+        "foreground": "#4EC9B0"
+      }
+    }
+  ]
+}
+

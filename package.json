@@ -1,0 +1,174 @@
+{
+  "name": "webgal-script-extension",
+  "displayName": "WebGAL Script Editor",
+  "description": "功能強大的 WebGAL 腳本編輯器，提供語法高亮、自動補全、場景導航、資源管理等功能",
+  "version": "0.1.0",
+  "publisher": "webgal-community",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Other"
+  ],
+  "keywords": [
+    "webgal",
+    "visual novel",
+    "game development",
+    "script editor"
+  ],
+  "activationEvents": [
+    "onLanguage:webgal",
+    "workspaceContains:**/game/scene/**/*.txt"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "webgal",
+        "aliases": [
+          "WebGAL Script",
+          "webgal"
+        ],
+        "extensions": [
+          ".txt"
+        ],
+        "configuration": "./language/configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "webgal",
+        "scopeName": "source.webgal",
+        "path": "./language/grammar.json"
+      }
+    ],
+    "themes": [
+      {
+        "label": "WebGAL Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/webgal-theme.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "webgal",
+        "path": "./language/snippets.json"
+      }
+    ],
+    "configuration": {
+      "title": "WebGAL Script",
+      "properties": {
+        "webgal.gamePath": {
+          "type": "string",
+          "default": "game",
+          "description": "WebGAL 遊戲根目錄路徑（相對於工作區）"
+        },
+        "webgal.enablePreview": {
+          "type": "boolean",
+          "default": true,
+          "description": "是否啟用資源預覽（圖片、音頻）"
+        },
+        "webgal.validateResources": {
+          "type": "boolean",
+          "default": true,
+          "description": "是否驗證資源文件是否存在"
+        },
+        "webgal.suggestCharacters": {
+          "type": "boolean",
+          "default": true,
+          "description": "是否自動提示角色名"
+        },
+        "webgal.autoScanResources": {
+          "type": "boolean",
+          "default": true,
+          "description": "是否自動掃描資源目錄"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "webgal.insertDialogue",
+        "title": "WebGAL: 插入對話"
+      },
+      {
+        "command": "webgal.insertChoice",
+        "title": "WebGAL: 插入選擇分支"
+      },
+      {
+        "command": "webgal.insertLabel",
+        "title": "WebGAL: 插入標籤"
+      },
+      {
+        "command": "webgal.gotoLabel",
+        "title": "WebGAL: 跳轉到標籤"
+      },
+      {
+        "command": "webgal.showSceneOutline",
+        "title": "WebGAL: 顯示場景大綱"
+      },
+      {
+        "command": "webgal.scanResources",
+        "title": "WebGAL: 掃描資源"
+      },
+      {
+        "command": "webgal.previewAsset",
+        "title": "WebGAL: 預覽資源"
+      }
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "webgalSceneOutline",
+          "name": "WebGAL 場景大綱"
+        },
+        {
+          "id": "webgalAssets",
+          "name": "WebGAL 資源管理器"
+        },
+        {
+          "id": "webgalVariables",
+          "name": "WebGAL 變數追蹤"
+        }
+      ]
+    },
+    "menus": {
+      "editor/context": [
+        {
+          "when": "resourceLangId == webgal",
+          "command": "webgal.insertDialogue",
+          "group": "webgal@1"
+        },
+        {
+          "when": "resourceLangId == webgal",
+          "command": "webgal.insertChoice",
+          "group": "webgal@2"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.80.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.40.0",
+    "typescript": "^5.1.0"
+  },
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-repo/webgal-script-extension"
+  },
+  "license": "MIT"
+}
+
