@@ -9,12 +9,17 @@ import { WEBGAL_COMMANDS, COMMAND_DOCS } from '../utils/constants';
 import { AssetScanner } from '../parsers/assetScanner';
 import { VariableTracker } from '../parsers/variableTracker';
 import { parseLine, extractLabels, extractCharacters } from '../parsers/scriptParser';
+import { ScenePathResolver } from '../utils/scenePathUtils';
 
 export class WebGALCompletionProvider implements vscode.CompletionItemProvider {
+  private sceneResolver: ScenePathResolver;
+  
   constructor(
     private assetScanner: AssetScanner,
     private variableTracker: VariableTracker
-  ) {}
+  ) {
+    this.sceneResolver = ScenePathResolver.getInstance();
+  }
   
   async provideCompletionItems(
     document: vscode.TextDocument,
@@ -42,7 +47,7 @@ export class WebGALCompletionProvider implements vscode.CompletionItemProvider {
     const colonMatch = linePrefix.match(/^(\w+):\s*$/);
     if (colonMatch) {
       const command = colonMatch[1];
-      return this.getCommandArgumentCompletions(command, document);
+      return await this.getCommandArgumentCompletions(command, document);
     }
     
     // 在參數值位置，提供資源文件補全
@@ -156,7 +161,7 @@ export class WebGALCompletionProvider implements vscode.CompletionItemProvider {
   /**
    * 獲取命令參數補全（冒號後面）
    */
-  private getCommandArgumentCompletions(command: string, document: vscode.TextDocument): vscode.CompletionItem[] {
+  private async getCommandArgumentCompletions(command: string, document: vscode.TextDocument): Promise<vscode.CompletionItem[]> {
     const completions: vscode.CompletionItem[] = [];
     
     // 根據命令類型提供不同的補全
@@ -179,7 +184,7 @@ export class WebGALCompletionProvider implements vscode.CompletionItemProvider {
       
       case 'changeScene':
       case 'callScene':
-        return this.getAssetCompletions('scene');
+        return await this.getSceneCompletions(document);
       
       case 'jumpLabel':
       case 'chooseLabel':
@@ -269,6 +274,57 @@ export class WebGALCompletionProvider implements vscode.CompletionItemProvider {
       }
       
       completions.push(item);
+    }
+    
+    return completions;
+  }
+  
+  /**
+   * 獲取場景補全（支持跨目錄）
+   */
+  private async getSceneCompletions(document: vscode.TextDocument): Promise<vscode.CompletionItem[]> {
+    const completions: vscode.CompletionItem[] = [];
+    
+    try {
+      // 獲取所有場景文件
+      const scenePaths = await this.sceneResolver.getAllSceneFiles();
+      
+      for (const scenePath of scenePaths) {
+        const item = new vscode.CompletionItem(scenePath.relativePath, vscode.CompletionItemKind.File);
+        item.detail = scenePath.exists ? '現有場景' : '建議創建';
+        item.documentation = new vscode.MarkdownString(
+          `**場景名稱:** ${scenePath.sceneName}\n\n` +
+          `**路徑:** ${scenePath.relativePath}\n\n` +
+          `**狀態:** ${scenePath.exists ? '✅ 已存在' : '⚠️ 不存在'}\n\n` +
+          `**目錄:** ${scenePath.directory}`
+        );
+        
+        // 如果文件不存在，提供創建選項
+        if (!scenePath.exists) {
+          item.kind = vscode.CompletionItemKind.Snippet;
+          item.detail = '創建新場景';
+          item.command = {
+            title: '創建場景',
+            command: 'webgal.createScene',
+            arguments: [scenePath]
+          };
+        }
+        
+        completions.push(item);
+      }
+      
+      // 添加創建新場景的選項
+      const createItem = new vscode.CompletionItem('$(plus) 創建新場景...', vscode.CompletionItemKind.Snippet);
+      createItem.detail = '啟動場景創建嚮導';
+      createItem.documentation = new vscode.MarkdownString('啟動場景創建嚮導，可以選擇創建新文件、新目錄或從模板創建。');
+      createItem.command = {
+        title: '創建場景嚮導',
+        command: 'webgal.createSceneWizard'
+      };
+      completions.unshift(createItem);
+      
+    } catch (error) {
+      console.error('Error getting scene completions:', error);
     }
     
     return completions;

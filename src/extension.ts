@@ -15,6 +15,7 @@ import { WebGALDocumentSymbolProvider } from './providers/documentSymbolProvider
 import { WebGALDiagnosticProvider } from './providers/diagnosticProvider';
 import { WebGALReferenceProvider } from './providers/referenceProvider';
 import { WebGALRenameProvider } from './providers/renameProvider';
+import { SceneCreationWizard } from './utils/scenePathUtils';
 
 const WEBGAL_LANGUAGE = 'webgal';
 
@@ -211,6 +212,115 @@ function registerCommands(context: vscode.ExtensionContext) {
           new vscode.Range(position, position),
           vscode.TextEditorRevealType.InCenter
         );
+      }
+    })
+  );
+  
+  // 場景創建嚮導命令
+  context.subscriptions.push(
+    vscode.commands.registerCommand('webgal.createSceneWizard', async () => {
+      const wizard = new SceneCreationWizard();
+      const uri = await wizard.startWizard();
+      if (uri) {
+        await vscode.window.showTextDocument(uri);
+      }
+    })
+  );
+  
+  // 創建場景命令
+  context.subscriptions.push(
+    vscode.commands.registerCommand('webgal.createScene', async (scenePathInfo: any) => {
+      const { ScenePathResolver } = await import('./utils/scenePathUtils');
+      const resolver = ScenePathResolver.getInstance();
+      
+      const uri = await resolver.createScene({
+        createFile: true,
+        directory: scenePathInfo.directory,
+        fileName: scenePathInfo.relativePath
+      });
+      
+      if (uri) {
+        await vscode.window.showTextDocument(uri);
+      }
+    })
+  );
+  
+  // 跳轉到場景命令
+  context.subscriptions.push(
+    vscode.commands.registerCommand('webgal.gotoScene', async () => {
+      const { ScenePathResolver } = await import('./utils/scenePathUtils');
+      const resolver = ScenePathResolver.getInstance();
+      
+      const sceneName = await vscode.window.showInputBox({
+        prompt: '輸入場景名稱或路徑',
+        placeHolder: '例如: daily_loop.txt 或 chapter1/start.txt'
+      });
+      
+      if (!sceneName) {
+        return;
+      }
+      
+      const scenePaths = await resolver.resolveScenePath(sceneName);
+      
+      if (scenePaths.length === 0) {
+        vscode.window.showWarningMessage(`找不到場景: ${sceneName}`);
+        return;
+      }
+      
+      if (scenePaths.length === 1) {
+        const scenePath = scenePaths[0];
+        if (scenePath.exists) {
+          const uri = vscode.Uri.file(scenePath.fullPath);
+          await vscode.window.showTextDocument(uri);
+        } else {
+          const shouldCreate = await vscode.window.showInformationMessage(
+            `場景文件不存在: ${scenePath.relativePath}`,
+            '創建文件',
+            '取消'
+          );
+          
+          if (shouldCreate === '創建文件') {
+            const wizard = new SceneCreationWizard();
+            const createdUri = await wizard.startWizard();
+            if (createdUri) {
+              await vscode.window.showTextDocument(createdUri);
+            }
+          }
+        }
+      } else {
+        // 多個匹配項，讓用戶選擇
+        const items = scenePaths.map(pathInfo => ({
+          label: pathInfo.relativePath,
+          description: pathInfo.exists ? '現有文件' : '不存在',
+          detail: pathInfo.directory,
+          pathInfo
+        }));
+        
+        const selected = await vscode.window.showQuickPick(items, {
+          placeHolder: '選擇要跳轉的場景'
+        });
+        
+        if (selected) {
+          const scenePath = selected.pathInfo;
+          if (scenePath.exists) {
+            const uri = vscode.Uri.file(scenePath.fullPath);
+            await vscode.window.showTextDocument(uri);
+          } else {
+            const shouldCreate = await vscode.window.showInformationMessage(
+              `場景文件不存在: ${scenePath.relativePath}`,
+              '創建文件',
+              '取消'
+            );
+            
+            if (shouldCreate === '創建文件') {
+              const wizard = new SceneCreationWizard();
+              const createdUri = await wizard.startWizard();
+              if (createdUri) {
+                await vscode.window.showTextDocument(createdUri);
+              }
+            }
+          }
+        }
       }
     })
   );
