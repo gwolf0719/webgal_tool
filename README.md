@@ -2,6 +2,28 @@
 
 功能強大的 WebGAL 腳本編輯器擴展，為 Cursor 和 VS Code 提供完整的 WebGAL 腳本開發支持。
 
+## 快速安裝
+
+### 方法一：直接下載安裝包
+
+1. 下載 [webgal-script-extension-0.1.0.vsix](https://github.com/gwolf0719/webgal_tool/raw/main/webgal-script-extension-0.1.0.vsix)
+2. 在 VS Code/Cursor 中：擴展面板 → `...` → 從 VSIX 安裝
+3. 選擇下載的文件
+
+### 方法二：命令行安裝
+
+```bash
+# 下載文件
+curl -LO https://github.com/gwolf0719/webgal_tool/raw/main/webgal-script-extension-0.1.0.vsix
+
+# 安裝
+code --install-extension webgal-script-extension-0.1.0.vsix
+# 或使用 Cursor
+cursor --install-extension webgal-script-extension-0.1.0.vsix
+```
+
+詳細安裝說明請查看 [INSTALL.md](INSTALL.md)
+
 ## 功能特色
 
 ### 🎨 語法高亮
