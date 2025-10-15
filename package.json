@@ -2,7 +2,7 @@
   "name": "webgal-script-extension",
   "displayName": "WebGAL Script Editor",
   "description": "功能強大的 WebGAL 腳本編輯器，提供語法高亮、自動補全、場景導航、資源管理等功能",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "webgal-community",
   "engines": {
     "vscode": "^1.80.0"
