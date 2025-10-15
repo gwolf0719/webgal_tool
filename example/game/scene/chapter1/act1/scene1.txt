@@ -1,0 +1,27 @@
+;========================================
+; 檔案名稱: chapter1/act1/scene1.txt
+; 描述: 多層資料夾測試場景
+; 說明: 測試三層目錄結構：chapter1/act1/scene1
+;========================================
+
+label:start;
+
+主角:這是三層目錄結構的場景！;
+主角:路徑是 chapter1/act1/scene1.txt;
+
+:測試跨層級跳轉：;
+
+; 跳轉到上層目錄的場景
+changeScene:../scene2.txt;
+
+; 跳轉到根目錄
+changeScene:../../start.txt;
+
+; 跳轉到其他章節的三層目錄
+changeScene:../chapter2/act1/scene1.txt;
+
+; 跳轉到四層目錄（如果存在）
+changeScene:../chapter3/act1/part1/scene1.txt;
+
+end;
+

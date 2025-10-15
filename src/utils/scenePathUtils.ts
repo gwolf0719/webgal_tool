@@ -109,18 +109,22 @@ export class ScenePathResolver {
         paths.push(path.join(relativeToCurrent, input + '.txt'));
       }
       
-      // 相對於當前文件的父目錄
-      const parentDir = path.dirname(relativeToCurrent);
-      if (parentDir && parentDir !== '.') {
-        paths.push(path.join(parentDir, input));
-        if (!input.endsWith('.txt')) {
-          paths.push(path.join(parentDir, input + '.txt'));
-        }
-      }
+      // 相對於當前文件的父目錄（多層級）
+      this.addParentDirectoryPaths(relativeToCurrent, input, paths);
     }
     
-    // 4. 常見的目錄結構
-    const commonDirs = ['', 'chapter1', 'chapter2', 'chapter3', 'endings', 'events'];
+    // 4. 常見的目錄結構（包括多層）
+    const commonDirs = [
+      '', 
+      'chapter1', 'chapter2', 'chapter3', 'chapter4', 'chapter5',
+      'endings', 'events', 'prologue', 'epilogue',
+      'chapter1/act1', 'chapter1/act2', 'chapter1/act3',
+      'chapter2/act1', 'chapter2/act2', 'chapter2/act3',
+      'chapter3/act1', 'chapter3/act2',
+      'events/special', 'events/battle', 'events/dialogue',
+      'endings/good', 'endings/bad', 'endings/true'
+    ];
+    
     for (const dir of commonDirs) {
       paths.push(path.join(dir, input));
       if (!input.endsWith('.txt')) {
@@ -129,6 +133,29 @@ export class ScenePathResolver {
     }
     
     return paths;
+  }
+  
+  /**
+   * 添加父目錄路徑（支援多層級）
+   */
+  private addParentDirectoryPaths(relativeToCurrent: string, input: string, paths: string[]): void {
+    let currentPath = relativeToCurrent;
+    
+    // 最多向上查找 5 層目錄
+    for (let i = 0; i < 5; i++) {
+      const parentDir = path.dirname(currentPath);
+      
+      if (parentDir === '.' || parentDir === currentPath) {
+        break; // 已到達根目錄
+      }
+      
+      paths.push(path.join(parentDir, input));
+      if (!input.endsWith('.txt')) {
+        paths.push(path.join(parentDir, input + '.txt'));
+      }
+      
+      currentPath = parentDir;
+    }
   }
   
   /**
@@ -476,7 +503,7 @@ export class SceneCreationWizard {
     
     try {
       const scanDir = (dirPath: string, basePath: string, depth = 0) => {
-        if (depth > 3) return; // 限制深度
+        if (depth > 10) return; // 增加深度限制到 10 層
         
         const items = fs.readdirSync(dirPath);
         for (const item of items) {

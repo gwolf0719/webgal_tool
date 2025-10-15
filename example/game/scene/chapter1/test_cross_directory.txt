@@ -1,0 +1,57 @@
+;========================================
+; 檔案名稱: test_cross_directory.txt
+; 描述: 測試跨目錄場景跳轉功能
+; 說明: 演示如何使用增強後的 changeScene 功能
+;========================================
+
+label:start;
+
+主角:歡迎來到跨目錄場景測試！;
+主角:現在我們來測試各種場景跳轉功能。;
+
+;========================================
+; 測試跨目錄場景跳轉
+;========================================
+
+:讓我們測試跳轉到其他目錄的場景：;
+
+; 跳轉到根目錄的場景
+changeScene:start.txt;
+
+; 跳轉到同級目錄的場景（如果存在）
+changeScene:chapter2/start.txt;
+
+; 跳轉到不同子目錄的場景
+changeScene:events/special_event.txt;
+
+; 跳轉到不存在的場景（會提示創建）
+changeScene:new_chapter/new_scene.txt;
+
+;========================================
+; 測試 callScene 跨目錄調用
+;========================================
+
+label:test_callScene;
+
+:現在測試 callScene 的跨目錄功能：;
+
+; 調用根目錄的場景
+callScene:daily_loop.txt;
+
+; 調用其他目錄的場景
+callScene:endings/good_ending.txt;
+
+; 條件調用
+callScene:chapter2/battle_scene.txt -when=player_level>10;
+
+;========================================
+; 測試變數和條件
+;========================================
+
+setVar:player_level=15;
+setVar:current_chapter=1;
+
+:測試完成！;
+
+end;
+
