@@ -32,6 +32,7 @@ cursor --install-extension webgal-script-extension-0.2.0.vsix
 
 ### ✨ 智能補全
 - **命令補全**：輸入時自動提示 40+ 種 WebGAL 命令
+- **內建函式補全**：支援所有 WebGAL 內建函式（數學、字串、亂數等）
 - **參數補全**：根據命令類型智能提示對應參數
 - **資源補全**：自動掃描並補全圖片、音頻、場景文件
 - **角色名補全**：追蹤腳本中出現的角色名
@@ -135,7 +136,15 @@ label:end;
 - **🆕 `webgal.createScene` - 創建場景**
 - **🆕 `webgal.gotoScene` - 跳轉到場景**
 
-### 4. 代碼片段
+### 4. 一鍵查看所有功能
+
+**快速查看所有可用指令**：
+- 在任意 `.txt` 文件中輸入 `Ctrl+Space` 查看所有補全選項
+- 輸入任何 WebGAL 命令後按 `:` 查看該命令的所有參數
+- 輸入 `$` 查看所有內建函式（數學、字串、亂數等）
+- 使用 `Ctrl+Shift+P` → 輸入 "WebGAL" 查看所有擴展命令
+
+### 5. 代碼片段
 
 輸入以下前綴然後按 Tab：
 - `dialogue` - 對話模板
@@ -177,6 +186,94 @@ label:end;
 | `unlockCg` | 解鎖CG | `unlockCg:cg.jpg -name=CG名稱` |
 | `unlockBgm` | 解鎖BGM | `unlockBgm:music.mp3 -name=曲名` |
 | `pixiPerform` | 特效演出 | `pixiPerform:rain` |
+
+## 🧮 WebGAL 內建函式參考
+
+### 數學函式
+
+| 函式 | 說明 | 範例 | 返回值 |
+|------|------|------|--------|
+| `Math.random()` | 生成 0-1 之間的亂數 | `setVar:random_num=Math.random()` | 0.0 ~ 1.0 |
+| `Math.floor()` | 向下取整 | `setVar:floor_num=Math.floor(3.7)` | 3 |
+| `Math.ceil()` | 向上取整 | `setVar:ceil_num=Math.ceil(3.2)` | 4 |
+| `Math.round()` | 四捨五入 | `setVar:round_num=Math.round(3.6)` | 4 |
+| `Math.abs()` | 絕對值 | `setVar:abs_num=Math.abs(-5)` | 5 |
+| `Math.max()` | 最大值 | `setVar:max_num=Math.max(1,5,3)` | 5 |
+| `Math.min()` | 最小值 | `setVar:min_num=Math.min(1,5,3)` | 1 |
+| `Math.pow()` | 次方 | `setVar:power=Math.pow(2,3)` | 8 |
+| `Math.sqrt()` | 平方根 | `setVar:sqrt_num=Math.sqrt(16)` | 4 |
+
+### 字串函式
+
+| 函式 | 說明 | 範例 | 返回值 |
+|------|------|------|--------|
+| `String.length` | 字串長度 | `setVar:name_len=userName.length` | 字串長度 |
+| `String.toUpperCase()` | 轉大寫 | `setVar:upper=userName.toUpperCase()` | 大寫字串 |
+| `String.toLowerCase()` | 轉小寫 | `setVar:lower=userName.toLowerCase()` | 小寫字串 |
+| `String.charAt()` | 取得字符 | `setVar:first_char=userName.charAt(0)` | 第0個字符 |
+| `String.indexOf()` | 查找位置 | `setVar:pos=userName.indexOf("a")` | 字符位置 |
+| `String.substring()` | 截取字串 | `setVar:sub=userName.substring(0,3)` | 截取的字串 |
+
+### 陣列函式
+
+| 函式 | 說明 | 範例 | 返回值 |
+|------|------|------|--------|
+| `Array.length` | 陣列長度 | `setVar:arr_len=myArray.length` | 陣列長度 |
+| `Array.push()` | 添加元素 | `myArray.push("新元素")` | 新陣列長度 |
+| `Array.pop()` | 移除最後元素 | `setVar:last=myArray.pop()` | 被移除的元素 |
+| `Array.join()` | 連接陣列 | `setVar:joined=myArray.join(",")` | 連接後的字串 |
+
+### 日期時間函式
+
+| 函式 | 說明 | 範例 | 返回值 |
+|------|------|------|--------|
+| `Date.now()` | 當前時間戳 | `setVar:timestamp=Date.now()` | 毫秒時間戳 |
+| `new Date()` | 創建日期物件 | `setVar:now=new Date()` | 日期物件 |
+| `Date.getHours()` | 取得小時 | `setVar:hour=new Date().getHours()` | 0-23 |
+| `Date.getMinutes()` | 取得分鐘 | `setVar:min=new Date().getMinutes()` | 0-59 |
+| `Date.getDate()` | 取得日期 | `setVar:day=new Date().getDate()` | 1-31 |
+
+### 亂數生成範例
+
+```webgal
+; 生成 1-100 的隨機整數
+setVar:random_int=Math.floor(Math.random() * 100) + 1;
+
+; 生成 0-10 的隨機小數
+setVar:random_float=Math.random() * 10;
+
+; 隨機選擇陣列元素
+setVar:choices=["選項A","選項B","選項C"];
+setVar:random_choice=choices[Math.floor(Math.random() * choices.length)];
+
+; 根據亂數進行條件判斷
+setVar:dice_roll=Math.floor(Math.random() * 6) + 1;
+if:dice_roll >= 4 -when=1;
+  角色:運氣不錯！骰子顯示 ${dice_roll}；
+else;
+  角色:運氣不佳...骰子顯示 ${dice_roll}；
+endif;
+```
+
+### 字串處理範例
+
+```webgal
+; 取得玩家名稱的第一個字符
+setVar:first_letter=userName.charAt(0);
+
+; 檢查名稱是否包含特定字符
+setVar:has_a=userName.indexOf("a") !== -1;
+
+; 轉換為標題格式（首字母大寫）
+setVar:title_name=userName.charAt(0).toUpperCase() + userName.substring(1).toLowerCase();
+
+; 字串長度檢查
+if:userName.length > 10 -when=1;
+  角色:你的名字很長呢！；
+else;
+  角色:${userName}，是個好名字！；
+endif;
+```
 
 ## 專案結構建議
 
@@ -231,6 +328,16 @@ A: 使用 "WebGAL: 場景創建嚮導" 命令，可以輸入如 `chapter1/act1/s
 ### Q: 場景跳轉找不到文件怎麼辦？
 A: 擴展會自動搜索多種可能的路徑，如果找不到會提供創建選項。確保 `webgal.gameBasePath` 配置正確。
 
+### Q: 如何使用內建函式（如亂數、字串處理）？
+A: 擴展支援完整的 WebGAL 內建函式補全。輸入 `$` 或 `Math.` 即可查看所有可用的函式。所有 JavaScript 標準函式都可在 `setVar` 命令中使用。
+
+### Q: 如何快速查看所有可用的命令和函式？
+A: 
+- 在任意位置按 `Ctrl+Space` 查看所有補全選項
+- 輸入命令名後按 `:` 查看參數補全
+- 輸入 `$` 查看所有內建函式
+- 使用 `Ctrl+Shift+P` → 輸入 "WebGAL" 查看所有擴展命令
+
 ## 反饋與貢獻
 
 - 問題反饋：[GitHub Issues](https://github.com/your-repo/issues)
@@ -245,6 +352,9 @@ A: 擴展會自動搜索多種可能的路徑，如果找不到會提供創建�
 - **⚡ 智能場景管理**：自動生成場景模板
 - **🛠️ 新增命令**：`createSceneWizard`、`createScene`、`gotoScene`
 - **🔧 增強補全**：跨目錄場景文件補全
+- **🧮 內建函式支援**：完整的 WebGAL 內建函式補全（數學、字串、陣列、日期）
+- **📚 函式文檔**：詳細的內建函式說明和範例
+- **⚡ 一鍵查看**：快速查看所有可用命令和函式
 
 ### 0.1.0 (2025-10-14)
 - ✨ 初始版本發布
