@@ -175,38 +175,156 @@ label:end;
 - `changeBg` - 更改背景
 - `setVar` - 設置變數
 
-## WebGAL 命令參考
+## 📖 WebGAL 常用指令規則參考
 
-### 基礎命令
+### 🎭 對話與旁白
 
-| 命令 | 說明 | 範例 |
-|------|------|------|
-| `角色:對話` | 顯示對話 | `角色:你好 -v=voice.ogg` |
-| `changeBg` | 更改背景 | `changeBg:bg.jpg -next` |
-| `changeFigure` | 更改立繪 | `changeFigure:char.png -left` |
-| `bgm` | 播放音樂 | `bgm:music.mp3` |
-| `playVideo` | 播放視頻 | `playVideo:video.mp4` |
+| 語法 | 說明 | 範例 | 參數 |
+|------|------|------|------|
+| `角色名:對話內容` | 角色對話 | `昂晴:你好！` | `-v=語音文件` |
+| `:旁白內容` | 旁白敘述 | `:房間裡很安靜` | `-next` |
+| `WebGAL:對話內容` | 系統對話 | `WebGAL:選擇已保存` | `-v=語音文件` |
 
-### 控制流命令
+**對話參數說明**：
+- `-v=語音文件`：指定語音文件（如 `voice.ogg`）
+- `-next`：立即執行下一句（不等待用戶點擊）
 
-| 命令 | 說明 | 範例 |
-|------|------|------|
-| `label` | 定義標籤 | `label:start` |
-| `jumpLabel` | 跳轉標籤 | `jumpLabel:start` |
-| `choose` | 選擇分支 | `choose:A:labelA\|B:labelB` |
-| `setVar` | 設置變數 | `setVar:score=100` |
-| `callScene` | 調用場景 | `callScene:sub.txt -when=flag==1` |
-| `changeScene` | 切換場景 | `changeScene:next.txt` |
+### 🎨 視覺效果
 
-### 進階命令
+| 命令 | 語法 | 說明 | 參數 |
+|------|------|------|------|
+| `changeBg` | `changeBg:背景文件` | 更換背景圖片 | `-next` |
+| `changeFigure` | `changeFigure:立繪文件` | 更換角色立繪 | `-left`, `-right`, `-center` |
+| `setAnimation` | `setAnimation:動畫名` | 設置動畫效果 | `-target=目標`, `-next` |
 
-| 命令 | 說明 | 範例 |
-|------|------|------|
-| `setAnimation` | 設置動畫 | `setAnimation:enter -target=fig-left` |
-| `miniAvatar` | 小頭像 | `miniAvatar:avatar.png` |
-| `unlockCg` | 解鎖CG | `unlockCg:cg.jpg -name=CG名稱` |
-| `unlockBgm` | 解鎖BGM | `unlockBgm:music.mp3 -name=曲名` |
-| `pixiPerform` | 特效演出 | `pixiPerform:rain` |
+**立繪位置參數**：
+- `-left`：左側立繪
+- `-right`：右側立繪  
+- `-center`：中央立繪
+
+### 🎵 音頻與視頻
+
+| 命令 | 語法 | 說明 | 參數 |
+|------|------|------|------|
+| `bgm` | `bgm:音樂文件` | 播放背景音樂 | `-loop`, `-volume=音量` |
+| `vocal` | `vocal:語音文件` | 播放語音 | `-volume=音量` |
+| `playVideo` | `playVideo:視頻文件` | 播放視頻 | `-loop` |
+
+### 🎮 遊戲控制
+
+| 命令 | 語法 | 說明 | 參數 |
+|------|------|------|------|
+| `label` | `label:標籤名` | 定義標籤 | 無 |
+| `jumpLabel` | `jumpLabel:標籤名` | 跳轉到標籤 | `-when=條件` |
+| `choose` | `choose:選項1:標籤1\|選項2:標籤2` | 選擇分支 | `-when=條件` |
+| `changeScene` | `changeScene:場景文件` | 切換場景 | `-when=條件` |
+| `callScene` | `callScene:子場景文件` | 調用子場景 | `-when=條件` |
+
+### 💾 變數與條件
+
+| 命令 | 語法 | 說明 | 範例 |
+|------|------|------|------|
+| `setVar` | `setVar:變數名=值` | 設置變數 | `setVar:score=100` |
+| `if` | `if:條件 -when=1` | 條件判斷開始 | `if:score>80 -when=1` |
+| `else` | `else;` | 否則分支 | `else;` |
+| `endif` | `endif;` | 條件判斷結束 | `endif;` |
+
+### 🏆 成就與收集
+
+| 命令 | 語法 | 說明 | 參數 |
+|------|------|------|------|
+| `unlockCg` | `unlockCg:CG文件` | 解鎖CG | `-name=CG名稱` |
+| `unlockBgm` | `unlockBgm:音樂文件` | 解鎖音樂 | `-name=曲名` |
+| `miniAvatar` | `miniAvatar:頭像文件` | 設置小頭像 | 無 |
+
+### ✨ 特效與動畫
+
+| 命令 | 語法 | 說明 | 參數 |
+|------|------|------|------|
+| `pixiPerform` | `pixiPerform:特效名` | 播放特效 | `rain`, `snow`, `fog` |
+| `setTransition` | `setTransition:過渡效果` | 設置過渡效果 | `fadeIn`, `fadeOut` |
+
+### 📝 註釋規則
+
+```webgal
+; 這是單行註釋
+; 註釋可以解釋代碼功能
+; 建議在重要段落添加註釋
+
+; 場景標記
+; 場景：第一章 - 相遇
+
+; 標籤定義
+label:chapter1_start;
+
+; 變數設置
+setVar:chapter=1;
+setVar:player_name=昂晴;
+```
+
+### 🔧 常用參數說明
+
+| 參數 | 說明 | 適用命令 | 範例 |
+|------|------|----------|------|
+| `-when=條件` | 條件執行 | 大部分命令 | `-when=score>80` |
+| `-next` | 立即執行下一句 | 視覺、音頻命令 | `-next` |
+| `-loop` | 循環播放 | 音頻、視頻命令 | `-loop` |
+| `-volume=音量` | 設置音量 | 音頻命令 | `-volume=0.5` |
+| `-name=名稱` | 設置名稱 | 解鎖命令 | `-name=重要CG` |
+
+### 🎯 條件表達式規則
+
+**支援的運算符**：
+- `>` 大於：`score>80`
+- `<` 小於：`score<50`
+- `>=` 大於等於：`score>=100`
+- `<=` 小於等於：`score<=200`
+- `==` 等於：`score==100`
+- `!=` 不等於：`score!=0`
+
+**條件表達式範例**：
+```webgal
+; 數值比較
+callScene:bonus.txt -when=score>=100;
+
+; 變數比較
+changeFigure:happy.png -when=affection>70;
+
+; 複雜條件
+bgm:special.mp3 -when=chapter>=3 && score>500;
+```
+
+### 📁 文件命名規則
+
+**場景文件**：
+- 使用 `.txt` 擴展名
+- 建議使用有意義的名稱：`chapter1_start.txt`
+- 支持多層目錄：`chapter1/act1/scene1.txt`
+
+**資源文件**：
+- **背景圖片**：放在 `background/` 目錄
+- **立繪圖片**：放在 `figure/` 目錄
+- **背景音樂**：放在 `bgm/` 目錄
+- **語音文件**：放在 `vocal/` 目錄
+- **視頻文件**：放在 `video/` 目錄
+
+### ⚠️ 常見錯誤與注意事項
+
+1. **語法錯誤**：
+   - 忘記分號結尾：`changeBg:bg.jpg` ❌ → `changeBg:bg.jpg;` ✅
+   - 參數格式錯誤：`-when = score>80` ❌ → `-when=score>80` ✅
+
+2. **文件路徑錯誤**：
+   - 路徑不存在：確保資源文件在正確目錄
+   - 擴展名錯誤：確保文件擴展名正確
+
+3. **變數命名**：
+   - 使用有意義的名稱：`player_score` 而非 `a`
+   - 避免特殊字符：使用字母、數字、下劃線
+
+4. **條件表達式**：
+   - 變數必須先定義：`setVar:score=100;` 然後才能使用 `score>80`
+   - 運算符兩邊要有空格（可選但建議）：`score > 80`
 
 ## 🧮 WebGAL 內建函式參考
 
@@ -475,6 +593,8 @@ A: 大多數 WebGAL 命令都支援 `-when` 參數，包括：
 - **⚠️ 功能限制說明**：明確標示不支援的 JavaScript 功能
 - **🎯 條件表達式支援**：完整的 `-when` 參數智能提示和文檔
 - **🔍 條件變數補全**：條件表達式中的變數定義跳轉和引用查找
+- **📖 完整指令規則**：詳細的 WebGAL 常用指令規則參考文檔
+- **⚠️ 錯誤預防指南**：常見錯誤與注意事項說明
 
 ### 0.1.0 (2025-10-14)
 - ✨ 初始版本發布
