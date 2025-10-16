@@ -30,9 +30,20 @@ export class SceneOutlineProvider implements vscode.TreeDataProvider<SceneOutlin
   readonly onDidChangeTreeData: vscode.Event<SceneOutlineItem | undefined | null | void> = this._onDidChangeTreeData.event;
 
   private scenePath: string | undefined;
+  private watcher?: vscode.FileSystemWatcher;
 
   constructor() {
     this.scenePath = getScenePath();
+    
+    // 監聽場景目錄的變化
+    if (this.scenePath) {
+      const pattern = new vscode.RelativePattern(this.scenePath, '**/*.txt');
+      this.watcher = vscode.workspace.createFileSystemWatcher(pattern);
+      
+      this.watcher.onDidCreate(() => this.refresh());
+      this.watcher.onDidDelete(() => this.refresh());
+      this.watcher.onDidChange(() => this.refresh());
+    }
   }
 
   /**
@@ -41,6 +52,15 @@ export class SceneOutlineProvider implements vscode.TreeDataProvider<SceneOutlin
   public refresh(): void {
     this.scenePath = getScenePath();
     this._onDidChangeTreeData.fire();
+  }
+
+  /**
+   * 清理資源
+   */
+  public dispose(): void {
+    if (this.watcher) {
+      this.watcher.dispose();
+    }
   }
 
   /**
@@ -74,19 +94,37 @@ export class SceneOutlineProvider implements vscode.TreeDataProvider<SceneOutlin
    * 取得子項目
    */
   getChildren(element?: SceneOutlineItem): Thenable<SceneOutlineItem[]> {
-    if (!this.scenePath) {
+    try {
+      if (!this.scenePath) {
+        console.warn('WebGAL: 場景路徑未配置，請檢查 webgal.gamePath 設定');
+        return Promise.resolve([{
+          type: 'file',
+          name: '⚠️ 未找到場景目錄',
+          path: '',
+          relativePath: '請在設定中配置 webgal.gamePath',
+          collapsibleState: vscode.TreeItemCollapsibleState.None
+        }]);
+      }
+
+      if (!element) {
+        // 根項目 - 顯示場景目錄的內容
+        return this.getSceneDirectoryContents(this.scenePath, '');
+      } else if (element.type === 'directory') {
+        // 目錄項目 - 顯示目錄內容
+        return this.getSceneDirectoryContents(element.path, element.relativePath);
+      }
+
       return Promise.resolve([]);
+    } catch (error) {
+      console.error('WebGAL: 場景大綱載入錯誤:', error);
+      return Promise.resolve([{
+        type: 'file',
+        name: '❌ 載入錯誤',
+        path: '',
+        relativePath: `錯誤: ${error}`,
+        collapsibleState: vscode.TreeItemCollapsibleState.None
+      }]);
     }
-
-    if (!element) {
-      // 根項目 - 顯示場景目錄的內容
-      return this.getSceneDirectoryContents(this.scenePath, '');
-    } else if (element.type === 'directory') {
-      // 目錄項目 - 顯示目錄內容
-      return this.getSceneDirectoryContents(element.path, element.relativePath);
-    }
-
-    return Promise.resolve([]);
   }
 
   /**

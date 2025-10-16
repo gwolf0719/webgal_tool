@@ -30,6 +30,9 @@ export interface AssetInfo {
 export class AssetScanner {
   private assets: Map<AssetType, AssetInfo[]> = new Map();
   private watchers: vscode.FileSystemWatcher[] = [];
+  private _onDidChangeAssets: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
+  public readonly onDidChangeAssets: vscode.Event<void> = this._onDidChangeAssets.event;
+  private scanDebounceTimer?: NodeJS.Timeout;
   
   constructor() {
     this.initializeAssets();
@@ -61,6 +64,9 @@ export class AssetScanner {
       this.scanTex(),
       this.scanAnimation(),
     ]);
+    
+    // 通知視圖更新
+    this._onDidChangeAssets.fire();
   }
   
   /**
@@ -207,6 +213,19 @@ export class AssetScanner {
   }
   
   /**
+   * 防抖掃描
+   */
+  private debouncedScanAll(): void {
+    if (this.scanDebounceTimer) {
+      clearTimeout(this.scanDebounceTimer);
+    }
+    
+    this.scanDebounceTimer = setTimeout(() => {
+      this.scanAll();
+    }, 500); // 500ms 防抖
+  }
+
+  /**
    * 啟動文件監視器
    */
   public startWatching(): void {
@@ -223,9 +242,9 @@ export class AssetScanner {
       const pattern = new vscode.RelativePattern(assetPath, '**/*');
       const watcher = vscode.workspace.createFileSystemWatcher(pattern);
       
-      watcher.onDidCreate(() => this.scanAll());
-      watcher.onDidDelete(() => this.scanAll());
-      watcher.onDidChange(() => this.scanAll());
+      watcher.onDidCreate(() => this.debouncedScanAll());
+      watcher.onDidDelete(() => this.debouncedScanAll());
+      watcher.onDidChange(() => this.debouncedScanAll());
       
       this.watchers.push(watcher);
     }

@@ -20,6 +20,7 @@ import { SceneOutlineProvider, SceneOutlineCommands } from './providers/sceneOut
 import { AssetTreeProvider, AssetTreeCommands } from './providers/assetTreeProvider';
 import { VariableTreeProvider, VariableTreeCommands } from './providers/variableTreeProvider';
 import { moveSelectedScriptToNewFile } from './utils/scriptMoveUtils';
+import { getGamePath } from './utils/fileUtils';
 
 const WEBGAL_LANGUAGE = 'webgal';
 
@@ -117,6 +118,19 @@ function registerProviders(context: vscode.ExtensionContext) {
  * 註冊樹狀視圖
  */
 function registerTreeViews(context: vscode.ExtensionContext) {
+  // 檢查遊戲目錄配置
+  const gamePath = getGamePath();
+  if (!gamePath) {
+    vscode.window.showWarningMessage(
+      'WebGAL: 未找到遊戲目錄。請在設定中配置 webgal.gamePath',
+      '打開設定'
+    ).then(selection => {
+      if (selection === '打開設定') {
+        vscode.commands.executeCommand('workbench.action.openSettings', 'webgal.gamePath');
+      }
+    });
+  }
+
   // 場景大綱視圖
   sceneOutlineProvider = new SceneOutlineProvider();
   const sceneOutlineTreeView = vscode.window.createTreeView('webgalSceneOutline', {
@@ -126,7 +140,7 @@ function registerTreeViews(context: vscode.ExtensionContext) {
   context.subscriptions.push(sceneOutlineTreeView);
 
   // 資源管理器視圖
-  assetTreeProvider = new AssetTreeProvider();
+  assetTreeProvider = new AssetTreeProvider(assetScanner);
   const assetTreeView = vscode.window.createTreeView('webgalAssets', {
     treeDataProvider: assetTreeProvider,
     showCollapseAll: true

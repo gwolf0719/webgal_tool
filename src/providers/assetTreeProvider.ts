@@ -9,6 +9,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { getGamePath } from '../utils/fileUtils';
+import { AssetScanner } from '../parsers/assetScanner';
 
 /**
  * 資源類型定義
@@ -99,8 +100,15 @@ export class AssetTreeProvider implements vscode.TreeDataProvider<AssetItem> {
 
   private gamePath: string | undefined;
 
-  constructor() {
+  constructor(private assetScanner?: AssetScanner) {
     this.gamePath = getGamePath();
+    
+    // 訂閱資源變化事件
+    if (this.assetScanner) {
+      this.assetScanner.onDidChangeAssets(() => {
+        this.refresh();
+      });
+    }
   }
 
   /**
@@ -144,19 +152,37 @@ export class AssetTreeProvider implements vscode.TreeDataProvider<AssetItem> {
    * 取得子項目
    */
   getChildren(element?: AssetItem): Thenable<AssetItem[]> {
-    if (!this.gamePath) {
+    try {
+      if (!this.gamePath) {
+        console.warn('WebGAL: 遊戲路徑未配置，請檢查 webgal.gamePath 設定');
+        return Promise.resolve([{
+          type: 'file',
+          name: '⚠️ 未找到遊戲目錄',
+          path: '',
+          relativePath: '請在設定中配置 webgal.gamePath',
+          collapsibleState: vscode.TreeItemCollapsibleState.None
+        }]);
+      }
+
+      if (!element) {
+        // 根項目 - 顯示所有資源分類
+        return this.getAssetCategories();
+      } else if (element.type === 'category') {
+        // 分類項目 - 顯示該分類下的檔案
+        return this.getAssetFiles(element.assetType!);
+      }
+
       return Promise.resolve([]);
+    } catch (error) {
+      console.error('WebGAL: 資源管理器載入錯誤:', error);
+      return Promise.resolve([{
+        type: 'file',
+        name: '❌ 載入錯誤',
+        path: '',
+        relativePath: `錯誤: ${error}`,
+        collapsibleState: vscode.TreeItemCollapsibleState.None
+      }]);
     }
-
-    if (!element) {
-      // 根項目 - 顯示所有資源分類
-      return this.getAssetCategories();
-    } else if (element.type === 'category') {
-      // 分類項目 - 顯示該分類下的檔案
-      return this.getAssetFiles(element.assetType!);
-    }
-
-    return Promise.resolve([]);
   }
 
   /**

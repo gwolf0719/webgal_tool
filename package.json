@@ -130,15 +130,18 @@
       },
       {
         "command": "webgal.refreshSceneOutline",
-        "title": "WebGAL: 重新整理場景大綱"
+        "title": "重新整理場景大綱",
+        "icon": "$(refresh)"
       },
       {
         "command": "webgal.refreshAssets",
-        "title": "WebGAL: 重新整理資源管理器"
+        "title": "重新整理資源管理器",
+        "icon": "$(refresh)"
       },
       {
         "command": "webgal.refreshVariables",
-        "title": "WebGAL: 重新整理變數追蹤"
+        "title": "重新整理變數追蹤",
+        "icon": "$(refresh)"
       },
       {
         "command": "webgal.moveScriptToNewFile",
@@ -177,6 +180,23 @@
           "when": "resourceLangId == webgal && editorHasSelection",
           "command": "webgal.moveScriptToNewFile",
           "group": "webgal@3"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "webgal.refreshSceneOutline",
+          "when": "view == webgalSceneOutline",
+          "group": "navigation"
+        },
+        {
+          "command": "webgal.refreshAssets",
+          "when": "view == webgalAssets",
+          "group": "navigation"
+        },
+        {
+          "command": "webgal.refreshVariables",
+          "when": "view == webgalVariables",
+          "group": "navigation"
         }
       ]
     }

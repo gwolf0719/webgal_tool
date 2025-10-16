@@ -34,6 +34,8 @@ export interface VariableTracking {
 export class VariableTracker {
   private variables: Map<string, VariableTracking> = new Map();
   private watcher?: vscode.FileSystemWatcher;
+  private _onDidChangeVariables: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
+  public readonly onDidChangeVariables: vscode.Event<void> = this._onDidChangeVariables.event;
   
   /**
    * 掃描所有變數
@@ -51,6 +53,9 @@ export class VariableTracker {
     for (const filePath of sceneFiles) {
       await this.scanFile(filePath);
     }
+    
+    // 通知視圖更新
+    this._onDidChangeVariables.fire();
   }
   
   /**
@@ -71,6 +76,9 @@ export class VariableTracker {
     
     // 查找變數使用
     this.findVariableUsages(content, filePath);
+    
+    // 通知視圖更新
+    this._onDidChangeVariables.fire();
   }
   
   /**

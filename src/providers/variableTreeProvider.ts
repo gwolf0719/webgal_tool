@@ -40,6 +40,11 @@ export class VariableTreeProvider implements vscode.TreeDataProvider<VariableIte
 
   constructor(variableTracker: VariableTracker) {
     this.variableTracker = variableTracker;
+    
+    // 訂閱變數變化事件
+    this.variableTracker.onDidChangeVariables(() => {
+      this.refresh();
+    });
   }
 
   /**
@@ -82,15 +87,25 @@ export class VariableTreeProvider implements vscode.TreeDataProvider<VariableIte
    * 取得子項目
    */
   getChildren(element?: VariableItem): Thenable<VariableItem[]> {
-    if (!element) {
-      // 根項目 - 顯示所有包含變數的檔案
-      return this.getFilesWithVariables();
-    } else if (element.type === 'file') {
-      // 檔案項目 - 顯示該檔案中的變數
-      return this.getVariablesInFile(element.path!);
-    }
+    try {
+      if (!element) {
+        // 根項目 - 顯示所有包含變數的檔案
+        return this.getFilesWithVariables();
+      } else if (element.type === 'file') {
+        // 檔案項目 - 顯示該檔案中的變數
+        return this.getVariablesInFile(element.path!);
+      }
 
-    return Promise.resolve([]);
+      return Promise.resolve([]);
+    } catch (error) {
+      console.error('WebGAL: 變數追蹤載入錯誤:', error);
+      return Promise.resolve([{
+        type: 'variable',
+        name: '❌ 載入錯誤',
+        relativePath: `錯誤: ${error}`,
+        collapsibleState: vscode.TreeItemCollapsibleState.None
+      }]);
+    }
   }
 
   /**
