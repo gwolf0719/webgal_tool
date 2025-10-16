@@ -16,12 +16,21 @@ import { WebGALDiagnosticProvider } from './providers/diagnosticProvider';
 import { WebGALReferenceProvider } from './providers/referenceProvider';
 import { WebGALRenameProvider } from './providers/renameProvider';
 import { SceneCreationWizard } from './utils/scenePathUtils';
+import { SceneOutlineProvider, SceneOutlineCommands } from './providers/sceneOutlineProvider';
+import { AssetTreeProvider, AssetTreeCommands } from './providers/assetTreeProvider';
+import { VariableTreeProvider, VariableTreeCommands } from './providers/variableTreeProvider';
+import { moveSelectedScriptToNewFile } from './utils/scriptMoveUtils';
 
 const WEBGAL_LANGUAGE = 'webgal';
 
 let assetScanner: AssetScanner;
 let variableTracker: VariableTracker;
 let diagnosticProvider: WebGALDiagnosticProvider;
+
+// Tree view providers
+let sceneOutlineProvider: SceneOutlineProvider;
+let assetTreeProvider: AssetTreeProvider;
+let variableTreeProvider: VariableTreeProvider;
 
 /**
  * 擴展激活時調用
@@ -36,6 +45,9 @@ export async function activate(context: vscode.ExtensionContext) {
   
   // 註冊語言提供器
   registerProviders(context);
+  
+  // 註冊樹狀視圖
+  registerTreeViews(context);
   
   // 註冊命令
   registerCommands(context);
@@ -99,6 +111,37 @@ function registerProviders(context: vscode.ExtensionContext) {
   );
   
   console.log('所有語言提供器已註冊');
+}
+
+/**
+ * 註冊樹狀視圖
+ */
+function registerTreeViews(context: vscode.ExtensionContext) {
+  // 場景大綱視圖
+  sceneOutlineProvider = new SceneOutlineProvider();
+  const sceneOutlineTreeView = vscode.window.createTreeView('webgalSceneOutline', {
+    treeDataProvider: sceneOutlineProvider,
+    showCollapseAll: true
+  });
+  context.subscriptions.push(sceneOutlineTreeView);
+
+  // 資源管理器視圖
+  assetTreeProvider = new AssetTreeProvider();
+  const assetTreeView = vscode.window.createTreeView('webgalAssets', {
+    treeDataProvider: assetTreeProvider,
+    showCollapseAll: true
+  });
+  context.subscriptions.push(assetTreeView);
+
+  // 變數追蹤視圖
+  variableTreeProvider = new VariableTreeProvider(variableTracker);
+  const variableTreeView = vscode.window.createTreeView('webgalVariables', {
+    treeDataProvider: variableTreeProvider,
+    showCollapseAll: true
+  });
+  context.subscriptions.push(variableTreeView);
+
+  console.log('所有樹狀視圖已註冊');
 }
 
 /**
@@ -224,6 +267,34 @@ function registerCommands(context: vscode.ExtensionContext) {
       if (uri) {
         await vscode.window.showTextDocument(uri);
       }
+    })
+  );
+
+  // 重新整理場景大綱命令
+  context.subscriptions.push(
+    vscode.commands.registerCommand('webgal.refreshSceneOutline', () => {
+      sceneOutlineProvider.refresh();
+    })
+  );
+
+  // 重新整理資源管理器命令
+  context.subscriptions.push(
+    vscode.commands.registerCommand('webgal.refreshAssets', () => {
+      assetTreeProvider.refresh();
+    })
+  );
+
+  // 重新整理變數追蹤命令
+  context.subscriptions.push(
+    vscode.commands.registerCommand('webgal.refreshVariables', () => {
+      variableTreeProvider.refresh();
+    })
+  );
+
+  // 移動腳本到新檔案命令
+  context.subscriptions.push(
+    vscode.commands.registerCommand('webgal.moveScriptToNewFile', () => {
+      moveSelectedScriptToNewFile();
     })
   );
   

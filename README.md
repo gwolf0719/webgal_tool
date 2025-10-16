@@ -6,7 +6,7 @@
 
 ### 方法一：直接下載安裝包
 
-1. 下載 [webgal-script-extension-0.2.0.vsix](https://github.com/gwolf0719/webgal_tool/raw/main/webgal-script-extension-0.2.0.vsix)
+1. 下載 [webgal-script-extension-0.3.0.vsix](webgal-script-extension-0.3.0.vsix)
 2. 在 VS Code/Cursor 中：擴展面板 → `...` → 從 VSIX 安裝
 3. 選擇下載的文件
 
@@ -14,12 +14,12 @@
 
 ```bash
 # 下載文件
-curl -LO https://github.com/gwolf0719/webgal_tool/raw/main/webgal-script-extension-0.2.0.vsix
+curl -LO webgal-script-extension-0.3.0.vsix
 
 # 安裝
-code --install-extension webgal-script-extension-0.2.0.vsix
+code --install-extension webgal-script-extension-0.3.0.vsix
 # 或使用 Cursor
-cursor --install-extension webgal-script-extension-0.2.0.vsix
+cursor --install-extension webgal-script-extension-0.3.0.vsix
 ```
 
 詳細安裝說明請查看 [INSTALL.md](INSTALL.md)
@@ -58,6 +58,11 @@ cursor --install-extension webgal-script-extension-0.2.0.vsix
 - 🎬 場景調用 (changeScene, callScene)
 - 💾 變數定義 (setVar)
 
+### 🆕 側邊欄視圖 (v0.3.0)
+- **📁 場景大綱視圖**：顯示所有場景檔案的樹狀結構，支援多層目錄展開
+- **🎨 資源管理器視圖**：按類型分類顯示遊戲資源（背景、立繪、音樂、語音、視頻、特效）
+- **📊 變數追蹤視圖**：顯示所有已定義的變數，支援跳轉到定義位置
+
 ### 🔧 語法診斷
 實時檢查：
 - ❌ 命令拼寫錯誤
@@ -71,6 +76,12 @@ cursor --install-extension webgal-script-extension-0.2.0.vsix
 - **📁 多層目錄支援**：支持最多10層深度的目錄結構
 - **🔍 智能路徑解析**：自動搜索多種可能的場景路徑
 - **⚡ 快速場景跳轉**：一鍵跳轉到任意場景文件
+
+### 🆕 腳本整理工具 (v0.3.0)
+- **✂️ 腳本移動功能**：圈選腳本內容後右鍵移動到新檔案
+- **🔄 自動跳轉指令**：移動後自動插入 `changePage` 跳轉指令
+- **📁 智能檔案處理**：支援新建檔案或追加到現有檔案
+- **🎯 多層目錄支援**：自動建立必要的目錄結構
 
 ### 🔄 重構工具
 - 重命名標籤，自動更新所有引用
@@ -150,6 +161,10 @@ label:end;
 - **🆕 `webgal.createSceneWizard` - 場景創建嚮導**
 - **🆕 `webgal.createScene` - 創建場景**
 - **🆕 `webgal.gotoScene` - 跳轉到場景**
+- **🆕 `webgal.moveScriptToNewFile` - 移動腳本到新檔案**
+- **🆕 `webgal.refreshSceneOutline` - 重新整理場景大綱**
+- **🆕 `webgal.refreshAssets` - 重新整理資源管理器**
+- **🆕 `webgal.refreshVariables` - 重新整理變數追蹤**
 
 ### 4. 一鍵查看所有功能
 
@@ -573,14 +588,17 @@ A: 大多數 WebGAL 命令都支援 `-when` 參數，包括：
 - `jumpLabel` - 條件標籤跳轉
 - 以及更多命令...
 
-## 反饋與貢獻
-
-- 問題反饋：[GitHub Issues](https://github.com/your-repo/issues)
-- 功能建議：歡迎提交 Pull Request
-
 ## 版本歷史
 
-### 0.2.0 (2025-10-15) 🆕
+### 0.3.0 (2025-01-16) 🆕
+- **📁 側邊欄視圖**：新增場景大綱、資源管理器、變數追蹤三個視圖
+- **✂️ 腳本移動功能**：圈選腳本後右鍵移動到新檔案，自動插入跳轉指令
+- **🔄 視圖重新整理**：提供重新整理命令保持視圖內容最新
+- **📊 變數管理**：變數追蹤視圖顯示所有變數定義位置和值
+- **🎨 資源分類**：資源管理器按類型分類顯示所有遊戲資源
+- **📁 場景瀏覽**：場景大綱視圖支援多層目錄結構瀏覽
+
+### 0.2.1 (2025-10-15)
 - **🎯 場景創建嚮導**：快速創建新場景文件或目錄
 - **📁 多層目錄支援**：支持最多10層深度的目錄結構
 - **🔍 跨目錄場景跳轉**：支持相對路徑和絕對路徑

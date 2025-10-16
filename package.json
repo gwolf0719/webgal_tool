@@ -2,7 +2,7 @@
   "name": "webgal-script-extension",
   "displayName": "WebGAL Script Editor",
   "description": "功能強大的 WebGAL 腳本編輯器，提供語法高亮、自動補全、場景導航、資源管理等功能",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "publisher": "webgal-community",
   "engines": {
     "vscode": "^1.80.0"
@@ -127,6 +127,22 @@
       {
         "command": "webgal.gotoScene",
         "title": "WebGAL: 跳轉到場景"
+      },
+      {
+        "command": "webgal.refreshSceneOutline",
+        "title": "WebGAL: 重新整理場景大綱"
+      },
+      {
+        "command": "webgal.refreshAssets",
+        "title": "WebGAL: 重新整理資源管理器"
+      },
+      {
+        "command": "webgal.refreshVariables",
+        "title": "WebGAL: 重新整理變數追蹤"
+      },
+      {
+        "command": "webgal.moveScriptToNewFile",
+        "title": "WebGAL: 移動腳本到新檔案"
       }
     ],
     "views": {
@@ -156,6 +172,11 @@
           "when": "resourceLangId == webgal",
           "command": "webgal.insertChoice",
           "group": "webgal@2"
+        },
+        {
+          "when": "resourceLangId == webgal && editorHasSelection",
+          "command": "webgal.moveScriptToNewFile",
+          "group": "webgal@3"
         }
       ]
     }
@@ -179,7 +200,7 @@
   "dependencies": {},
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-repo/webgal-script-extension"
+    "url": "https://github.com/gwolf0719/webgal_tool"
   },
   "license": "MIT"
 }
